@@ -1,44 +1,59 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+var createError = require("http-errors");
+var express = require("express");
+var path = require("path");
+var cookieParser = require("cookie-parser");
+const logger = require("./utils/logger");
 
-var indexRouter = require('./routes/index');
-const { port } = require("./db/connect/config"); // 获取启动参数
+var indexRouter = require("./routes/index");
 
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "jade");
 
-app.use(logger('dev'));
+// express默认使用morgan打印日志
+// app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use('/', indexRouter);
+// 挂载静态资源
+app.use("/static", express.static("public"));
+// 挂载路由模块
+app.use("/", indexRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
+/**
+ * 错误处理
+ */
+// 捕获 500 错误
+app.use((err, req, res, next) => {
+  res.status(500).send("500 Server Error");
+  logger.error(
+    `${err.status || 500} - ${res.statusMessage} - ${err.message} - ${
+      req.originalUrl
+    } - ${req.method} - ${req.ip}`
+  );
+});
+
+// 中间件捕获 404 错误，并定向到错误处理
+app.use((req, res, next) => {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = req.app.get("env") === "development" ? err : {};
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.send("404 Not Found");
+  logger.error(
+    `[${req.method}-${res.statusMessage}-${req.originalUrl}-${req.ip}]: ${err.message}`
+  );
 });
-
-app.listen(port, () => {
-  console.log(`express server listen at http://47.100.121.250:${port}`)
-})
 
 module.exports = app;
