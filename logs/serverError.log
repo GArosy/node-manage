@@ -1,0 +1,5 @@
+2022-08-11 19:25:31 error [www]: 	[GET-Not Found-/api-::ffff:127.0.0.1]: Not Found
+2022-08-11 19:31:10 error [www]: 	[GET-Not Found-/api/calc-::ffff:127.0.0.1]: Not Found
+2022-08-11 19:31:30 error [www]: 	[GET-Internal Server Error-/api/calc-::ffff:127.0.0.1]: Invalid status code: 20
+2022-08-11 19:31:53 error [www]: 	[GET-Not Found-/api-::ffff:127.0.0.1]: Not Found
+2022-08-11 19:34:29 error [www]: 	500 - Internal Server Error - Invalid status code: 20 - /api/calc - GET - ::ffff:127.0.0.1
