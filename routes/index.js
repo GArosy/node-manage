@@ -1,7 +1,8 @@
-const { application, Router } = require("express");
 const express = require("express");
 const db = require("../db/connect/db");
 const logger = require("../utils/logger");
+const mall = require('./mall')
+
 const router = express.Router();
 
 router.all("/", (req, res, next) => {
@@ -39,4 +40,4 @@ router.get('/api/calc', (req, res, next)=>{
   res.send(x * y)
 })
 
-module.exports = router;
+module.exports = router, mall;

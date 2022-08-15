@@ -5,6 +5,7 @@ var cookieParser = require("cookie-parser");
 const logger = require("./utils/logger");
 
 var indexRouter = require("./routes/index");
+var mallRouter = require("./routes/mall");
 
 var app = express();
 
@@ -23,6 +24,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/static", express.static("public"));
 // 挂载路由模块
 app.use("/", indexRouter);
+app.use("/api/mall", mallRouter);
 
 /**
  * 错误处理
