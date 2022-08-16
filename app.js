@@ -15,10 +15,19 @@ app.set("view engine", "jade");
 
 // express默认使用morgan打印日志
 // app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json());``
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+// 设置CORS跨域
+app.use((req,res,next)=>{
+  // 设置响应头
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', '*');
+  next()
+})
 
 // 挂载静态资源
 app.use("/static", express.static("public"));
