@@ -16,12 +16,17 @@ router.get("/getGoods", (req, res) => {
   }, ${limit}`;
   // 获取列表大小
   const sqlCount = `select count(*) from ${database}`;
+  // 搜索
+  const sqlSearch = `select * from ${database} where name='${name}'`;
   // 拼接查询语句
-  const sql = sqlLen + ";" + sqlCount;
+  const sql = name
+    ? sqlSearch + ";" + sqlCount + ` where name='${name}'`
+    : sqlLen + ";" + sqlCount;
 
   db.queryDB(sql, (err, data) => {
     if (err) {
       res.send(`query error: ${err}`);
+      console.log(sql);
       return;
     } else {
       // 将 MySQL 查询结果作为路由返回值，这里返回的是json类型的数据
@@ -53,7 +58,7 @@ router.post("/createGoods", (req, res) => {
       res.send(`query error: ${err}`);
       return;
     } else {
-      res.send(`添加成功: ${JSON.stringify(req.query)}`)
+      res.send(`添加成功: ${JSON.stringify(req.query)}`);
     }
   });
 
@@ -76,7 +81,7 @@ router.post("/editGoods", (req, res) => {
       res.send(`query error: ${err}`);
       return;
     } else {
-      res.send(`编辑成功: ${JSON.stringify(req.query)}`)
+      res.send(`编辑成功: ${JSON.stringify(req.query)}`);
     }
   });
 
@@ -99,7 +104,7 @@ router.get("/delGoods", (req, res) => {
       res.send(`query error: ${err}`);
       return;
     } else {
-      res.send(`删除成功: ${JSON.stringify(req.query)}`)
+      res.send(`删除成功: ${JSON.stringify(req.query)}`);
     }
   });
 
