@@ -1,3 +1,5 @@
 logs/
 node_nodules/
 .git/
+logs/serverError.log
+logs/serverInfo.log
