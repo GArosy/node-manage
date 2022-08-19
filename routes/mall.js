@@ -1,5 +1,7 @@
 const { Router } = require("express");
 const fs = require("fs");
+const qs = require("qs");
+const multiparty = require("multiparty");
 const multer = require("multer");
 const db = require("../db/connect/db");
 const logger = require("../utils/logger");
@@ -30,6 +32,12 @@ router.get("/getGoods", (req, res) => {
       res.send(`query error: ${err}`);
       return;
     } else {
+      // 打印日志
+      logger.info(
+        `[${req.method}-${res.statusMessage}-${req.originalUrl}-${
+          req.ip
+        }]: 获取列表:${JSON.stringify(req.query)}`
+      );
       // 将 MySQL 查询结果作为路由返回值，这里返回的是json类型的数据
       res.json({
         method: "GET",
@@ -38,13 +46,6 @@ router.get("/getGoods", (req, res) => {
       });
     }
   });
-
-  // 打印日志
-  logger.info(
-    `[${req.method}-${res.statusMessage}-${req.originalUrl}-${
-      req.ip
-    }]: 获取列表:${JSON.stringify(req.query)}`
-  );
 });
 
 /**
@@ -59,16 +60,15 @@ router.post("/createGoods", (req, res) => {
       res.send(`query error: ${err}`);
       return;
     } else {
-      res.send(`添加成功: ${JSON.stringify(req.query)}`);
+      // 打印日志
+      logger.info(
+        `[${req.method}-${res.statusMessage}-${req.originalUrl}-${
+          req.ip
+        }]: 添加项:${JSON.stringify(req.query)}`
+      );
+      return res.send(`添加成功: ${JSON.stringify(req.query)}`);
     }
   });
-
-  // 打印日志
-  logger.info(
-    `[${req.method}-${res.statusMessage}-${req.originalUrl}-${
-      req.ip
-    }]: 添加项:${JSON.stringify(req.query)}`
-  );
 });
 
 /**
@@ -82,16 +82,15 @@ router.post("/editGoods", (req, res) => {
       res.send(`query error: ${err}`);
       return;
     } else {
-      res.send(`编辑成功: ${JSON.stringify(req.query)}`);
+      // 打印日志
+      logger.info(
+        `[${req.method}-${res.statusMessage}-${req.originalUrl}-${
+          req.ip
+        }]: 编辑项:${JSON.stringify(req.query)}`
+      );
+      return res.send(`编辑成功: ${JSON.stringify(req.query)}`);
     }
   });
-
-  // 打印日志
-  logger.info(
-    `[${req.method}-${res.statusMessage}-${req.originalUrl}-${
-      req.ip
-    }]: 编辑项:${JSON.stringify(req.query)}`
-  );
 });
 
 /**
@@ -105,27 +104,29 @@ router.get("/delGoods", (req, res) => {
       res.send(`query error: ${err}`);
       return;
     } else {
-      res.send(`删除成功: ${JSON.stringify(req.query)}`);
+      // 打印日志
+      logger.info(
+        `[${req.method}-${res.statusMessage}-${req.originalUrl}-${
+          req.ip
+        }]: 删除项:${JSON.stringify(req.query)} `
+      );
+      return res.send(`删除成功: ${JSON.stringify(req.query)}`);
     }
   });
-
-  // 打印日志
-  logger.info(
-    `[${req.method}-${res.statusMessage}-${req.originalUrl}-${
-      req.ip
-    }]: 删除项:${JSON.stringify(req.query)} `
-  );
 });
 
 // 上传图片
 const storage = multer.diskStorage({
+  // 要保存的文件夹
   destination: (req, file, cb) => {
-    cb(null, "../upload/");
+    cb(null, "./upload");
   },
+  // 在文件夹下的文件名
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+    cb(null, req.body.id + '.jpg');
   },
 });
+// 创建upload文件夹
 const createFolder = (folder) => {
   try {
     fs.accessSync(folder);
@@ -133,17 +134,30 @@ const createFolder = (folder) => {
     fs.mkdirSync(folder);
   }
 };
-const uploadFolder = "../upload/";
+const uploadFolder = "./upload/";
 createFolder(uploadFolder);
+// 实例化multer
 const upload = multer({
-  storage,
+  storage: storage,
 });
-router.post("/uploadGoodsPics", upload.single('file'), (req, res) => {
-  let file = req.file;
-  res.json({
-    res_code: '0',
-    name: file.originalname,
-    url: file.path
+// 上传单个文件内容，file为上传时文件的字段名称
+router.post("/uploadGoodsPics", upload.single("file"), (req, res) => {
+  // 使用json解析FormData数据
+  const { originalname, size, destination } = JSON.parse(
+    JSON.stringify(req.file)
+  );
+  const id = JSON.parse(JSON.stringify(req.body.id));
+
+  // 打印日志
+  logger.info(
+    `[${req.method}-${res.statusMessage}-${req.originalUrl}-${req.ip}]: 上传图片:${originalname} `
+  );
+  return res.json({
+    res_code: "1",
+    id,
+    originalname,
+    size,
+    destination,
   });
 });
 
