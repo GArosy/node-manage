@@ -1,4 +1,6 @@
 const { Router } = require("express");
+const fs = require("fs");
+const multer = require("multer");
 const db = require("../db/connect/db");
 const logger = require("../utils/logger");
 
@@ -26,7 +28,6 @@ router.get("/getGoods", (req, res) => {
   db.queryDB(sql, (err, data) => {
     if (err) {
       res.send(`query error: ${err}`);
-      console.log(sql);
       return;
     } else {
       // 将 MySQL 查询结果作为路由返回值，这里返回的是json类型的数据
@@ -114,6 +115,36 @@ router.get("/delGoods", (req, res) => {
       req.ip
     }]: 删除项:${JSON.stringify(req.query)} `
   );
+});
+
+// 上传图片
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "../upload/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+const createFolder = (folder) => {
+  try {
+    fs.accessSync(folder);
+  } catch (e) {
+    fs.mkdirSync(folder);
+  }
+};
+const uploadFolder = "../upload/";
+createFolder(uploadFolder);
+const upload = multer({
+  storage,
+});
+router.post("/uploadGoodsPics", upload.single('file'), (req, res) => {
+  let file = req.file;
+  res.json({
+    res_code: '0',
+    name: file.originalname,
+    url: file.path
+  });
 });
 
 module.exports = router;
