@@ -1,7 +1,5 @@
 const { Router } = require("express");
 const fs = require("fs");
-const qs = require("qs");
-const multiparty = require("multiparty");
 const multer = require("multer");
 const db = require("../db/connect/db");
 const logger = require("../utils/logger");
@@ -115,15 +113,33 @@ router.get("/delGoods", (req, res) => {
   });
 });
 
-// 上传图片
+/**
+ * 上传图片
+ */
+// 配置multer保存路径、文件名
 const storage = multer.diskStorage({
   // 要保存的文件夹
   destination: (req, file, cb) => {
     cb(null, "./upload");
   },
-  // 在文件夹下的文件名
+  // 文件名
   filename: (req, file, cb) => {
-    cb(null, req.body.id + '.jpg');
+    // 处理文件名后缀
+    let type = "";
+    switch (file.mimetype) {
+      case "image/jpeg":
+        type = ".jpg";
+        break;
+      case "image/png":
+        type = ".png";
+        break;
+      case "image/gif":
+        type = ".gif";
+        break;
+      default:
+        break;
+    }
+    cb(null, req.body.id + type);
   },
 });
 // 创建upload文件夹
@@ -143,22 +159,76 @@ const upload = multer({
 // 上传单个文件内容，file为上传时文件的字段名称
 router.post("/uploadGoodsPics", upload.single("file"), (req, res) => {
   // 使用json解析FormData数据
+  /**
+   *   返回的req.file字段
+   *   fieldname: 'file',
+   *   originalname: 'å¾®ä¿¡å\x9B¾ç\x89\x87_20210215222948.jpg',
+   *   encoding: '7bit',
+   *   mimetype: 'image/jpeg',
+   *   destination: './upload',
+   *   filename: '5910f602-b13c-4a5a-a9f7-659fc1188988.jpg',
+   *   path: 'upload\\5910f602-b13c-4a5a-a9f7-659fc1188988.jpg',
+   *   size: 208475
+   */
+  // console.log(JSON.parse(JSON.stringify(req.file)));
   const { originalname, size, destination } = JSON.parse(
     JSON.stringify(req.file)
   );
   const id = JSON.parse(JSON.stringify(req.body.id));
+  const goodsId = JSON.parse(JSON.stringify(req.body.goodsId));
+
+  // 图片信息储存至数据库
+  let sql_code = "0";
+  const sql = `insert into goodspic values ('${id}','${goodsId}','${req.file.filename}','${req.file.originalname}','${req.file.mimetype}','${req.file.size}')`;
+  db.queryDB(sql, (err, data) => {
+    if (err) {
+      console.log(`query error: ${err}`);
+      return;
+    } else {
+      sql_code = "1";
+    }
+  });
 
   // 打印日志
   logger.info(
-    `[${req.method}-${res.statusMessage}-${req.originalUrl}-${req.ip}]: 上传图片:${originalname} `
+    `[${req.method}-${res.statusMessage}-${req.originalUrl}]: 上传图片:${originalname} `
   );
   return res.json({
     res_code: "1",
+    sql_code,
     id,
     originalname,
     size,
     destination,
   });
 });
+
+/**
+ * 回显已上传的图片列表
+ */
+router.get("/showGoodsPicsList", (req, res) => {
+  // 如果图片列表为空
+  if (!req.query.goodsId) {
+    console.log('商品对应的图片列表为空！');
+    return res.json({code: 0})
+  }
+  const sql = `select * from goodspic where goodsid='${req.query.goodsId}'`;
+  db.queryDB(sql, (err, data) => {
+    if (err) {
+      console.log(`query error: ${err}`);
+      return;
+    } else {
+      res.json({
+        code: 1,
+        method: "GET",
+        list: data,
+      });
+    }
+  });
+});
+
+/**
+ * 删除已上传的图片
+ */
 
 module.exports = router;
