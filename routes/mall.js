@@ -207,10 +207,9 @@ router.post("/uploadGoodsPics", upload.single("file"), (req, res) => {
  * 回显已上传的图片列表
  */
 router.get("/showGoodsPicsList", (req, res) => {
-  // 如果图片列表为空
+  // 忽视参数为空的请求
   if (!req.query.goodsId) {
-    console.log('商品对应的图片列表为空！');
-    return res.json({code: 0})
+    return;
   }
   const sql = `select * from goodspic where goodsid='${req.query.goodsId}'`;
   db.queryDB(sql, (err, data) => {
@@ -230,5 +229,26 @@ router.get("/showGoodsPicsList", (req, res) => {
 /**
  * 删除已上传的图片
  */
-
+router.get("/removeGoodsPics", (req, res) => {
+  const sql = `delete from goodspic where picname='${req.query.picname}'`;
+  db.queryDB(sql, (err, data) => {
+    if (err) {
+      console.log(`query error: ${err}`);
+      return;
+    } else {
+      // 使用fs删除文件
+      fs.unlink(`./upload/${req.query.picname}`, (e) => {
+        console.log(e);
+      });
+      // 打印日志
+      logger.info(
+        `[${req.method}-${res.statusMessage}-${req.originalUrl}]: 删除图片:${req.query.picname} `
+      );
+      return res.json({
+        code: 1,
+        method: "GET",
+      });
+    }
+  });
+});
 module.exports = router;
