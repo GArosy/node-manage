@@ -15,7 +15,7 @@ app.set("view engine", "jade");
 
 // express默认使用morgan打印日志
 // app.use(logger('dev'));
-app.use(express.json());``
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));

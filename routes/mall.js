@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const fs = require("fs");
+const path = require("path");
 const multer = require("multer");
 const db = require("../db/connect/db");
 const logger = require("../utils/logger");
@@ -230,19 +231,19 @@ router.get("/showGoodsPicsList", (req, res) => {
  * 删除已上传的图片
  */
 router.get("/removeGoodsPics", (req, res) => {
-  const sql = `delete from goodspic where picname='${req.query.picname}'`;
+  const sql = `delete from goodspic where picname='${req.query.name}'`;
+  console.log(req.query);
   db.queryDB(sql, (err, data) => {
     if (err) {
       console.log(`query error: ${err}`);
       return;
     } else {
       // 使用fs删除文件
-      fs.unlink(`./upload/${req.query.picname}`, (e) => {
-        console.log(e);
-      });
+      //    注意：nodejs中使用相对路径是不可靠的，尽量使用__dirname
+      fs.unlink(path.join(__dirname, `../upload/${req.query.name}`), (e) => {});
       // 打印日志
       logger.info(
-        `[${req.method}-${res.statusMessage}-${req.originalUrl}]: 删除图片:${req.query.picname} `
+        `[${req.method}-${res.statusMessage}-${req.originalUrl}]: 删除图片:${req.query.name} `
       );
       return res.json({
         code: 1,
