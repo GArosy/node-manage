@@ -30,7 +30,7 @@ app.use((req,res,next)=>{
 })
 
 // 挂载静态资源
-app.use("/static", express.static("public"));
+app.use("/static", express.static("upload"));
 // 挂载路由模块
 app.use("/", indexRouter);
 app.use("/api/mall", mallRouter);
