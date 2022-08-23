@@ -1,5 +1,5 @@
-logs/
-node_nodules/
+*.log
+logs/*
+node_modules/
 .git/
-logs/serverError.log
-logs/serverInfo.log
+upload/
