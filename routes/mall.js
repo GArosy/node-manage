@@ -7,6 +7,7 @@ const logger = require("../utils/logger");
 
 const router = Router();
 const database = "goodslist";
+const host = "localhost";
 
 /**
  * 获取商品列表
@@ -180,7 +181,7 @@ router.post("/uploadGoodsPics", upload.single("file"), (req, res) => {
 
   // 图片信息储存至数据库
   let sql_code = "0";
-  const sql = `insert into goodspic values ('${id}','${goodsId}','${req.file.filename}','${req.file.originalname}','${req.file.mimetype}','${req.file.size}')`;
+  const sql = `insert into goodspic values ('${id}','${goodsId}','${req.file.filename}','${req.file.originalname}','${req.file.mimetype}','${req.file.size}','http://${host}:3000/static/${req.file.filename}')`;
   db.queryDB(sql, (err, data) => {
     if (err) {
       console.log(`query error: ${err}`);
