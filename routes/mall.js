@@ -118,7 +118,7 @@ router.get("/delGoods", (req, res) => {
 /**
  * 上传图片
  */
-// 配置multer保存路径、文件名
+// 配置multer storage，保存路径、文件名
 const storage = multer.diskStorage({
   // 要保存的文件夹
   destination: (req, file, cb) => {
@@ -126,24 +126,14 @@ const storage = multer.diskStorage({
   },
   // 文件名
   filename: (req, file, cb) => {
-    // 处理文件名后缀
-    let type = "";
-    switch (file.mimetype) {
-      case "image/jpeg":
-        type = ".jpg";
-        break;
-      case "image/png":
-        type = ".png";
-        break;
-      case "image/gif":
-        type = ".gif";
-        break;
-      default:
-        break;
-    }
-    cb(null, req.body.id + type);
+    cb(null, file.originalname);
   },
 });
+// 配置multer fileFilter，过滤文件，处理originalname乱码bug
+function fileFilter(req, file, cb) {
+  file.originalname = Buffer.from(file.originalname, "latin1").toString("utf8");
+  cb(null, true);
+}
 // 创建upload文件夹
 const createFolder = (folder) => {
   try {
@@ -155,9 +145,7 @@ const createFolder = (folder) => {
 const uploadFolder = "./upload/";
 createFolder(uploadFolder);
 // 实例化multer
-const upload = multer({
-  storage: storage,
-});
+const upload = multer({ storage: storage, fileFilter });
 // 上传单个文件内容，file为上传时文件的字段名称
 router.post("/uploadGoodsPics", upload.single("file"), (req, res) => {
   // 使用json解析FormData数据
@@ -167,21 +155,17 @@ router.post("/uploadGoodsPics", upload.single("file"), (req, res) => {
    *   originalname: 'å¾®ä¿¡å\x9B¾ç\x89\x87_20210215222948.jpg',
    *   encoding: '7bit',
    *   mimetype: 'image/jpeg',
-   *   destination: './upload',
-   *   filename: '5910f602-b13c-4a5a-a9f7-659fc1188988.jpg',
-   *   path: 'upload\\5910f602-b13c-4a5a-a9f7-659fc1188988.jpg',
    *   size: 208475
    */
   // console.log(JSON.parse(JSON.stringify(req.file)));
-  const { originalname, size, destination } = JSON.parse(
+  const { originalname, size } = JSON.parse(
     JSON.stringify(req.file)
   );
-  const id = JSON.parse(JSON.stringify(req.body.id));
   const goodsId = JSON.parse(JSON.stringify(req.body.goodsId));
 
   // 图片信息储存至数据库
   let sql_code = "0";
-  const sql = `insert into goodspic values ('${id}','${goodsId}','${req.file.filename}','${req.file.originalname}','${req.file.mimetype}','${req.file.size}','http://${host}:3000/static/${req.file.filename}')`;
+  const sql = `insert into goodspic values ('${goodsId}','${req.file.originalname}','${req.file.mimetype}','${req.file.size}','http://${host}:3000/static/${req.file.filename}')`;
   db.queryDB(sql, (err, data) => {
     if (err) {
       console.log(`query error: ${err}`);
@@ -193,15 +177,14 @@ router.post("/uploadGoodsPics", upload.single("file"), (req, res) => {
 
   // 打印日志
   logger.info(
-    `[${req.method}-${res.statusMessage}-${req.originalUrl}]: 上传图片:${originalname} `
+    `[${req.method}-${res.statusMessage}-${req.originalUrl}]: 上传图片:${req.file.originalname} `
   );
   return res.json({
     res_code: "1",
     sql_code,
-    id,
     originalname,
     size,
-    destination,
+    url: `http://${host}:3000/static/${req.file.filename}`
   });
 });
 
@@ -232,8 +215,8 @@ router.get("/showGoodsPicsList", (req, res) => {
  * 删除已上传的图片
  */
 router.get("/removeGoodsPics", (req, res) => {
-  const sql = `delete from goodspic where picname='${req.query.name}'`;
-  console.log(req.query);
+  const sql = `delete from goodspic where originalname='${req.query.name}'`;
+  // console.log(req.query);
   db.queryDB(sql, (err, data) => {
     if (err) {
       console.log(`query error: ${err}`);
@@ -241,7 +224,10 @@ router.get("/removeGoodsPics", (req, res) => {
     } else {
       // 使用fs删除文件
       //    注意：nodejs中使用相对路径是不可靠的，尽量使用__dirname
-      fs.unlink(path.join(__dirname, `../upload/${req.query.name}`), (e) => {});
+      fs.unlink(
+        path.join(__dirname, `../upload/${req.query.name}`),
+        (e) => {}
+      );
       // 打印日志
       logger.info(
         `[${req.method}-${res.statusMessage}-${req.originalUrl}]: 删除图片:${req.query.name} `
@@ -249,8 +235,10 @@ router.get("/removeGoodsPics", (req, res) => {
       return res.json({
         code: 1,
         method: "GET",
+        query: req.query,
       });
     }
   });
 });
+
 module.exports = router;
