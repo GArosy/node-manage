@@ -21,13 +21,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // 设置CORS跨域
-app.use((req,res,next)=>{
+app.use((req, res, next) => {
   // 设置响应头
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Methods', '*');
-  next()
-})
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Methods", "*");
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  next();
+});
 
 // 挂载静态资源
 app.use("/static", express.static("upload"));
