@@ -53,7 +53,7 @@ router.get("/getGoods", (req, res) => {
  */
 router.post("/createGoods", (req, res) => {
   // 为商品添加随机id
-  const addSql = `insert into ${database} values (replace(UUID(),"-",""), '${req.query.name}', '${req.query.price}', '${req.query.amount}', '${req.query.type}', '${req.query.photo}', '${req.query.description}')`;
+  const addSql = `insert into ${database} values (replace(UUID(),"-",""), '${req.query.name}', '${req.query.price}', '${req.query.amount}', '${req.query.type}', '${req.query.photo}', '${req.query.descText}', '${req.query.descHtml}')`;
 
   db.queryDB(addSql, (err, data) => {
     if (err) {
@@ -75,7 +75,7 @@ router.post("/createGoods", (req, res) => {
  * 编辑商品
  */
 router.post("/editGoods", (req, res) => {
-  const editSql = `update ${database} set name='${req.query.name}',price='${req.query.price}',amount='${req.query.amount}',type='${req.query.type}',photo='${req.query.photo}',description='${req.query.description}' where id='${req.query.id}'`;
+  const editSql = `update ${database} set name='${req.query.name}',price='${req.query.price}',amount='${req.query.amount}',type='${req.query.type}',photo='${req.query.photo}',descText='${req.query.descText}',descHtml='${req.query.descHtml}' where id='${req.query.id}'`;
 
   db.queryDB(editSql, (err, data) => {
     if (err) {
