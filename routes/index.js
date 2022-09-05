@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../db/connect/db");
 const logger = require("../utils/logger");
 const mall = require('./mall')
+const user = require('./user')
 
 const router = express.Router();
 
@@ -34,10 +35,4 @@ router.get("/api/get", (req, res, next) => {
   });
 });
 
-router.get('/api/calc', (req, res, next)=>{
-  let x = 10;
-  let y = 2;
-  res.send(x * y)
-})
-
-module.exports = router, mall;
+module.exports = router;
