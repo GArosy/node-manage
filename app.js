@@ -3,6 +3,8 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 const logger = require("./utils/logger");
+const { expressjwt } = require("express-jwt");
+const secret = require("./utils/jwtsecret");
 
 var indexRouter = require("./routes/index");
 var mallRouter = require("./routes/mall");
@@ -20,6 +22,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+// 配置全局token验证和白名单
+app.use(
+  expressjwt({
+    secret: secret.jwtSecret,
+    algorithms: ["HS256"],
+  })
+  .unless({ path: ["/api/user/login"] })
+);
+// token错误处理
+app.use(function (err, req, res, next) {
+  if (err.name === "UnauthorizedError") {
+    res.status(401).send('invalid token...');
+  } else {
+    next(err)
+  }
+});
 
 // 设置CORS跨域
 app.use((req, res, next) => {
