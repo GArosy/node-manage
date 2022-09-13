@@ -6,6 +6,7 @@ const logger = require("./utils/logger");
 
 var indexRouter = require("./routes/index");
 var mallRouter = require("./routes/mall");
+var userRouter = require("./routes/user");
 
 var app = express();
 
@@ -24,7 +25,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use((req, res, next) => {
   // 设置响应头
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
   res.setHeader("Access-Control-Allow-Methods", "*");
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   next();
@@ -35,6 +36,7 @@ app.use("/static", express.static("upload"));
 // 挂载路由模块
 app.use("/", indexRouter);
 app.use("/api/mall", mallRouter);
+app.use("/api/user", userRouter);
 
 /**
  * 错误处理
