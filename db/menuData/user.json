@@ -1,0 +1,38 @@
+{
+  "menu": [
+    {
+      "path": "/",
+      "name": "home",
+      "label": "首页",
+      "icon": "s-home",
+      "url": "Home"
+    },
+    {
+      "path": "/mall",
+      "name": "mall",
+      "label": "商品管理",
+      "icon": "s-goods",
+      "url": "Mall"
+    },
+    {
+      "label": "其他",
+      "icon": "info",
+      "children": [
+        {
+          "path": "/usercenter",
+          "name": "usercenter",
+          "label": "个人中心",
+          "icon": "s-custom",
+          "url": "UserCenter"
+        },
+        {
+          "path": "/introduction",
+          "name": "introduction",
+          "label": "项目说明",
+          "icon": "question",
+          "url": "Information"
+        }
+      ]
+    }
+  ]
+}
