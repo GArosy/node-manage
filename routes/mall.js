@@ -43,6 +43,7 @@ router.get("/getGoods", (req, res) => {
         method: "GET",
         list: data[0],
         count: data[1][0]["count(*)"],
+        auth: req.auth
       });
     }
   });
@@ -158,9 +159,7 @@ router.post("/uploadGoodsPics", upload.single("file"), (req, res) => {
    *   size: 208475
    */
   // console.log(JSON.parse(JSON.stringify(req.file)));
-  const { originalname, size } = JSON.parse(
-    JSON.stringify(req.file)
-  );
+  const { originalname, size } = JSON.parse(JSON.stringify(req.file));
   const goodsId = JSON.parse(JSON.stringify(req.body.goodsId));
 
   // 图片信息储存至数据库
@@ -184,7 +183,7 @@ router.post("/uploadGoodsPics", upload.single("file"), (req, res) => {
     sql_code,
     originalname,
     size,
-    url: `http://${host}:3000/static/${req.file.filename}`
+    url: `http://${host}:3000/static/${req.file.filename}`,
   });
 });
 
@@ -224,10 +223,7 @@ router.get("/removeGoodsPics", (req, res) => {
     } else {
       // 使用fs删除文件
       //    注意：nodejs中使用相对路径是不可靠的，尽量使用__dirname
-      fs.unlink(
-        path.join(__dirname, `../upload/${req.query.name}`),
-        (e) => {}
-      );
+      fs.unlink(path.join(__dirname, `../upload/${req.query.name}`), (e) => {});
       // 打印日志
       logger.info(
         `[${req.method}-${res.statusMessage}-${req.originalUrl}]: 删除图片:${req.query.name} `
