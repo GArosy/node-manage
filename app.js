@@ -3,8 +3,7 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 const logger = require("./utils/logger");
-const { expressjwt } = require("express-jwt");
-const secret = require("./utils/jwtsecret");
+const expressjwt = require("./utils/expressjwt");
 
 var indexRouter = require("./routes/index");
 var mallRouter = require("./routes/mall");
@@ -23,23 +22,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-// 配置全局token验证和白名单
-app.use(
-  expressjwt({
-    secret: secret.jwtSecret,
-    algorithms: ["HS256"],
-  })
-  .unless({ path: ["/api/user/login"] })
-);
-// token错误处理
-app.use(function (err, req, res, next) {
-  if (err.name === "UnauthorizedError") {
-    res.status(401).send('invalid token...');
-  } else {
-    next(err)
-  }
-});
-
 // 设置CORS跨域
 app.use((req, res, next) => {
   // 设置响应头
@@ -48,6 +30,24 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Methods", "*");
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   next();
+});
+
+// 配置全局token验证和白名单
+app.use(expressjwt);
+
+// token错误处理
+app.use(function (err, req, res, next) {
+  console.log(err);
+  if (err.name === "UnauthorizedError") {
+    res.status(401).send("invalid token...");
+    logger.error(
+      `[${req.method}-${res.statusMessage}-${req.originalUrl}-${req.ip}]: ${err}`
+    );
+  } else if (error.name === "TokenExpiredError") {
+    return res.status(401).send("token expired...");
+  } else {
+    next(error);
+  }
 });
 
 // 挂载静态资源
