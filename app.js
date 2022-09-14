@@ -37,16 +37,15 @@ app.use(expressjwt);
 
 // token错误处理
 app.use(function (err, req, res, next) {
-  console.log(err);
+  logger.error(
+    `[${req.method}-${res.statusMessage}-${req.originalUrl}-${req.ip}]: ${err}`
+  );
   if (err.name === "UnauthorizedError") {
     res.status(401).send("invalid token...");
-    logger.error(
-      `[${req.method}-${res.statusMessage}-${req.originalUrl}-${req.ip}]: ${err}`
-    );
-  } else if (error.name === "TokenExpiredError") {
+  } else if (err.name === "TokenExpiredError") {
     return res.status(401).send("token expired...");
   } else {
-    next(error);
+    next(err);
   }
 });
 

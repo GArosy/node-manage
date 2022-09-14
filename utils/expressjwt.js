@@ -7,7 +7,7 @@ module.exports =  expressjwt({
   // 设置算法
   algorithms: ["HS256"],
   // 无token请求不进行解析，并且抛出异常
-  credentialsRequired: false,
+  // credentialsRequired: false,
 }).unless({
   // 白名单
   path: ["/api/user/login", "/api/user/register"],
