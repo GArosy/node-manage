@@ -32,6 +32,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// 挂载静态资源
+app.use("/static", express.static("upload"));
+
 // 配置全局token验证和白名单
 app.use(expressjwt);
 
@@ -49,8 +52,6 @@ app.use(function (err, req, res, next) {
   }
 });
 
-// 挂载静态资源
-app.use("/static", express.static("upload"));
 // 挂载路由模块
 app.use("/", indexRouter);
 app.use("/api/mall", mallRouter);
